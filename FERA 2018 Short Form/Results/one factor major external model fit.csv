@@ -1,0 +1,17 @@
+﻿Model,Error Condition,External Relationship,Method,Time to Complete (mins),CFI,TLI,RMSEA,Composite Reliability
+One Factor,None,None,ACO,1.537,0.975,0.967,0.045,0.855
+,None,None,SA,1.490,0.992,0.990,0.020,0.819
+,None,None,TS,5.672,0.985,0.981,0.027,0.810
+,None,None,GA,0.625,0.975,0.968,0.043,0.839
+,None,Moderate,ACO,1.703,0.979,0.973,0.040,0.861
+,None,Moderate,SA,1.529,0.991,0.989,0.021,0.806
+,None,Moderate,TS,6.171,0.985,0.981,0.027,0.810
+,None,Moderate,GA,0.608,0.975,0.968,0.044,0.860
+,Major,None,ACO,1.594,0.944,0.928,0.062,0.834
+,Major,None,SA,1.448,0.983,0.979,0.028,0.788
+,Major,None,TS,5.570,0.944,0.928,0.057,0.796
+,Major,None,GA,0.613,0.846,0.802,0.113,0.835
+,Major,Moderate,ACO,1.803,0.945,0.931,0.058,0.836
+,Major,Moderate,SA,1.529,0.981,0.977,0.029,0.783
+,Major,Moderate,TS,6.096,0.930,0.912,0.063,0.803
+,Major,Moderate,GA,0.602,0.858,0.822,0.107,0.850

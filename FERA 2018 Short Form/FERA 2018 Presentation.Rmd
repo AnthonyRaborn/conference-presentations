@@ -1,0 +1,344 @@
+---
+title:
+  - "Comparison of Automated Short Form Selection Strategies"
+author: 
+  - "Anthony Raborn$^1$"
+  - "Walter Leite"
+  - "Katerina Marcoulides"
+institute: 
+  - "University of Florida"
+  - "1: Corresponding author: anthony.w.raborn@gmail.com"
+date: 
+  - "November 8, 2018"
+output: 
+  beamer_presentation:
+    theme: "PaloAlto"
+    colortheme: "orchid"
+    # citation_package: biblatex
+bibliography: fera2018.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(kableExtra)
+library(dplyr)
+```
+
+# Goals
+
+## Goals of this Study
+
+- Compare different scale reduction strategies
+  1. Time to converge (faster is better)
+  2. Model fit of final scales (better fit is better)
+  3. Reliability of final scales (higher reliability is better)
+  4. Removal of specific problematic items (fewer problematic items is better)
+- Determine which factors effect these comparisons
+  1. Population model type (one factor, three factor, bifactor)
+  2. Severity of problematic items (none, minor, major)
+  3. Strength of relationship to external criterion (none, moderate)
+
+# Introduction
+
+## Applications of Psychometric Scales
+
+- Applied researchers are often faced with a dilemma:
+  - Option A: Use a well-established but lengthy scale with fewer additional items
+  - Option B: Use a few items from a scale with more additional items
+- Both options have some drawbacks!
+  - Option A: Potentially longer administration time for less information
+  - Option B:  Potentially greater information but weaker validity evidence
+- In the literature, researchers attempt to use Option B with some effort spent on buoying the validity evidence
+
+## Examples in the Literature
+
+1. Hand-Selecting Items
+  - using theoretical or practical justifications per item [e.g., @noble2013short]
+  - Retaining one of many redundant items [e.g., @dennis2003breastfeeding]
+2. Statistical Criteria
+  - Retaining items with high factor loadings or item correlations [e.g., @byrne2011development;@wester2012development]
+  - Selecting items that improve measures of reliability and/or dimensionality [e.g., @lim2013development; @veale2014edinburgh]
+  
+Overall, the focus of the above examples are on the internal structure of the scales. This is in spite of researchers wanting to use the short form for predictive/correlational purposes.
+
+## Specific Example: Positive Mental Health Assessment
+
+Petrillo et al.[-@petrillo2015mental] developed a short form of a positive mental health assessment for Italian respondents. Items were selected from twelve other scales with a focus on the final form's internal structure (a second-order three factor model).
+
+  - CFI: .93, TLI: .91, RMSEA: .06[^1]
+  - Overall scale $\alpha=.86$
+
+Despite this, the short form was only weakly correlated with other scales mwith good validity evidence which also assessed mental health.
+
+  - Range of total score correlations[^2]: 0.20 to 0.62
+
+
+[^1]: Adequate, but not ideal, fit [@hu1999cutoff]
+[^2]: Absolute value of correlations. Mean absolute correlation: 0.37
+
+## Problem
+
+Creating short forms with (1) good internal structure and (2) good predictive, convergent, and/or divergent validity is difficult by hand.
+
+One potential solution would be to use metaheuristic optimization algorithms [@dreo2006metaheuristics]. These algorithms can *simultaneously optimize* multiple criteria, particularly the internal structure and external relationships of a scale.
+
+# Theoretical Framework
+
+## Previous Attempts
+
+There have been a few methods in the literature of using algorithms to shorten scales. Some of the common ones are:
+
+1. "Maximize Main Loadings"
+  - An often-used algorithm that essentially automates the process of picking the items with the highest factor loadings. Generally results in a homogenous item structure within each factor [@olaru2015methods]
+    - Not a metaheuristic algorithm, so not included in study
+2. Ant Colony Optimization (ACO)
+  - @leite2008item developed and compared ACO to traditional methods to create a short form of a quality-of-life scale for diabetics while optimizing the relationship with an external criterion variable
+
+
+## Previous Attempts, cont'd
+
+3. Tabu Search (TS)
+  - @marcoulides2004tabu demonstrated a use of TS to reduce the number of items loading on factors
+4. Genetic Algorithm (GA)
+  - @yarkoni2010abbreviation developed the particular application to combine 203 distinct personality scales into one inventory
+    - Did *not* include any external relationships in the algorithm or a way to include them
+    
+## Ant Colony Optimization Algorithm
+
+ACO [@colorni1992investigation] mimics the behavior of ants searching for the shortest path to a food source.
+
+The ants leave the nest (N) leaving pheremone trails (yellow lines) to the food source (F) that the next iteration of ants follow.
+
+Over time, the pheremone builds up along the shortest path until (almost) all ants follow the same path (see next slide).
+
+@leite2008item set all paths (items) equal initially, used 20 ants per iteration, used the mean standardized regression coefficients of the model as the pheremone level, and the overall model fit by CFI, TLI, and RMSEA as the food source. 
+
+___
+
+![Ant Colony Optimization [@toksari2016hybrid]](Methods Diagrams/aco.jpg){width=300px}
+
+## Tabu Search
+
+TS [@Glover1989] is a local search metaheuristic that can accept potential solutions that are worse than the current solution if no better solutions exist. It employs a list of *tabu* solutions that have already been explored; this list keeps solutions for a certain number of iterations before they are removed from the list.
+
+Within each iteration, TS explores all possible local models (i.e., models that differ by one parameter). Typically, the algorithm stops after a predetermined number of iterations.
+
+___
+
+![Tabu Search [@ali2016concentric]](Methods Diagrams/ts.png){height=250px}
+
+## Genetic Algorithm
+
+Yarkoni's [-@yarkoni2010abbreviation] implementation of GA is a metaheuristic that mimics evolutionary processes to search for solutions. A randomly selected groups of items making up potential solutions (chromosomes) make up the initial population, which is then evaluated with the fit function $$Cost=Ik+\Sigma^s_{i=1}(1-R^2_i)$$ where *I* is a fixed item cost, *k* is the number of retained items, *i* indexes the scale, and $R^2_i$ is the variance explained by the retained items on scale *i*. Smaller costs results in higher fitness; the more fit solutions are retained for the next iteration, with some leeway for crossover (two solutions trading sets of items) and mutations (random items switched out for others).
+
+___
+
+![Genetic Algorithm [@liao2001educational]](Methods Diagrams/ga.png){width=250px}
+
+## Simulated Annealing
+
+Simulated Annealing[^3] [SA; @Kirkpatrick1983] is a global search metaheuristic that is a statistical analog to the metallurgic processes of annealing metals [@marcoulides1999using]. It randomly searches the solution space and probabilistically accepts proposed solutions based on (1) the fit of the proposed solution ($model_2$) and (2) the temperature of the current iteration. The acceptance probability is
+$$P(model_2|fit_1,fit_2,currentTemp) = \begin{cases} exp{\frac{-(fit_2-fit_1)}{currentTemp}}, & fit_1>fit_2 \\ 1, & fit_1 \leq fit2 \end{cases}.$$
+As the algorithm progresses, the temperature approaches zero, reducing the probability that worse-fitting solutions are selected. 
+
+[^3]: SA has not been used for psychometric models before in the literature. 
+
+___
+
+![Simulated Annealing [@wang2013d3]](Methods Diagrams/sa.jpg){height=250px}
+
+# Research Questions
+
+## Research Questions
+
+1. How do model misspecifications in the full form affect the fit of the short forms created by the algorithms?
+2. Do the algorithms differ in their ability to exclude problematic items from the short forms?
+3. Does the inclusion of a covariate (such as a predictive covariate or a convergent validity variable) affect the model fit of the short forms and the exclusion of problematic items?
+4. How do the algorithms differ in terms of the time it takes for each to converge on a short form?
+
+# Method
+
+## Factors Manipulated
+
+The following factors were manipulated for this study:
+
+1. The dimensionality of the full form
+  - One Factor
+  - Three Factor
+  - Bifactor with Three Specific Factors
+2. Full-scale model misspecification
+  - No misspecification
+  - Minor misspecification (six items loading on a nuisance parameter with $\lambda=.3$)
+  - Major misspecification (six items loading on a nuisance parameter with $\lambda=.6$)
+  
+___
+
+3. Relationship to External Criterion Variable
+  - No relationship
+  - Moderate relationship ($\gamma = .6$)
+  
+This leads to a total of $3*3*2=18$ conditions in the study.
+
+___
+
+### One Factor Model
+
+![20-item Self-Deceptive Enhancement Scale [@leite2005validation]](Factor Diagrams/One Factor Diagram.png){width=225px}
+
+___
+
+### Three Factor Model
+
+![24-item Teacher Efficacy Scale [@tschannen2001teacher]](Factor Diagrams/Three Factor Diagram.png){width=310px}
+
+___
+
+### Bifactor Model
+
+![27-item BASC-2 BESS Bifactor Model [@splett2017factor]](Factor Diagrams/Bifactor Diagram.png){width=340px}
+
+## Simulation
+
+The entire analysis was conducted in R [@RCT2018], with the data simulated with the `MASS` package [@Venables2002] using the covariance matrices for each condition. 
+
+The ACO, SA, and TS algorithm implementations used the `ShortForm` package [@Raborn2018]. The GA was adopted with minor modifications from the `GAabbreviate` package [@Sahdra2016].
+
+The sample size was fixed at $n = 500$, and a total of 100 iterations for each condition.
+
+## Analysis of Results
+
+After data were simulated, the run time of each algorithm was recorded. Once the algorithms converged, the CFI, TLI, and RMSEA of the final model were saved and the composite reliability calculated using the following formula: 
+$$CR = \frac{\Sigma^I_{i=1}\lambda^2_i}{\Sigma^I_{i=1}\lambda^2_i + \Sigma^I_{i=1}\theta_i} $$
+where $I$ is the total number of items in the short form, $\lambda_i$ is the standardized factor loading of item $i$, and $\theta_i$ is the residual variance of item $i$.
+Finally, the proportion of iterations in which each algorithm included the problematic items was calculated.
+
+# Results
+
+## One Factor Model Fit: No External Variable
+
+```{r one factor no external results}
+oneFactorNoEx <- read.csv("C:/Users/chika/Google Drive/Short-form_development/Comparison of search algorithms for short form selection/Results/one factor no external model fit.csv")[,-1]
+colnames(oneFactorNoEx) = c("Error Condition", "Method", "Time to Complete (mins)", "CFI", "TLI", "RMSEA", "Composite Reliability")
+oneFactorNoEx %>% 
+  kable('latex', booktabs = T) %>%
+  column_spec(column = 1:7, width = "0.7in") %>%
+  collapse_rows(columns = 1, valign = "middle", latex_hline = "major") %>%
+  kable_styling(latex_options = "scale_down")
+```
+
+
+## One Factor Model Fit: External Variable
+
+```{r one factor moderate external results}
+oneFactorMajorEx <- read.csv("C:/Users/chika/Google Drive/Short-form_development/Comparison of search algorithms for short form selection/Results/one factor major external model fit.csv")[,-1]
+colnames(oneFactorMajorEx) = c("Error Condition", "External Relationship", "Method", "Time to Complete (mins)", "CFI", "TLI", "RMSEA", "Composite Reliability")
+oneFactorMajorEx$`Error Condition` = ""
+oneFactorMajorEx %>% 
+  kable('latex', booktabs = T) %>%
+  column_spec(column = 1:8, width = "0.65in") %>%
+  group_rows(group_label = "None", start_row = 1, end_row = 8) %>%
+  group_rows(group_label = "Major", start_row = 9, end_row = 16) %>%
+    collapse_rows(columns = 2, valign = "middle", latex_hline = "major") %>%
+  kable_styling(latex_options = "scale_down")
+```
+
+## One Factor Item Selection
+
+```{r one factor item selection no external}
+oneFactorBadItems <- read.csv("C:/Users/chika/Google Drive/Short-form_development/Comparison of search algorithms for short form selection/Results/one factor no external bad items.csv", stringsAsFactors = T)
+colnames(oneFactorBadItems) = c("Error Condition", "Item", "Factor Loading", "ACO", "SA", "TS", "GA")
+averagePropSelectedOne = as.data.frame(rbind(colMeans(oneFactorBadItems[1:6,4:7]), colMeans(oneFactorBadItems[7:12,4:7])))
+oneFactorBadItems[,4:7] = apply(oneFactorBadItems[,4:7], 2, as.character)
+
+averagePropSelectedOne$Item = averagePropSelectedOne$`Factor Loading` = ""
+averagePropSelectedOne$`Error Condition` = c("Minor Error Proportion:", "Major Error Proportion:")
+averagePropSelectedOne[,1:4] = round(averagePropSelectedOne[,1:4]/100, 3)
+
+oneFactorBadItems = rbind(oneFactorBadItems, averagePropSelectedOne)
+
+oneFactorBadItems %>% 
+  kable('latex', booktabs = T) %>%
+  # column_spec(column = 1:7, width = "0.7in") %>%
+  collapse_rows(columns = 1, valign = "middle", latex_hline = "major") %>%
+  kable_styling(latex_options = "scale_down")
+
+```
+
+## Three Factor Model Fit: No External Variable
+
+```{r three factor no external results}
+threeFactorNoEx <- read.csv("C:/Users/chika/Google Drive/Short-form_development/Comparison of search algorithms for short form selection/Results/three factor no external model fit.csv")[,-1]
+colnames(threeFactorNoEx) = c("Error Condition", "Method", "Time to Complete (mins)", "CFI", "TLI", "RMSEA", "Composite Reliability")
+threeFactorNoEx %>% 
+  kable('latex', booktabs = T) %>%
+  column_spec(column = 1:7, width = "0.7in") %>%
+  collapse_rows(columns = 1, valign = "middle", latex_hline = "major") %>%
+  kable_styling(latex_options = "scale_down")
+```
+
+
+## Three Factor Model Fit: External Variable
+
+```{r three factor moderate external results, results='asis'}
+threeFactorMajorEx <- read.csv("C:/Users/chika/Google Drive/Short-form_development/Comparison of search algorithms for short form selection/Results/three factor major external model fit.csv")[,-1]
+colnames(threeFactorMajorEx) = c("Error Condition", "External Relationship", "Method", "Time to Complete (mins)", "CFI", "TLI", "RMSEA", "Composite Reliability")
+threeFactorMajorEx$`Error Condition` = ""
+threeFactorMajorEx %>% 
+  kable('latex', booktabs = T) %>%
+  column_spec(column = 1:8, width = "0.65in") %>%
+  group_rows(group_label = "None", start_row = 1, end_row = 8) %>%
+  group_rows(group_label = "Major", start_row = 9, end_row = 16) %>%
+    collapse_rows(columns = 2, valign = "middle", latex_hline = "major") %>%
+  kable_styling(latex_options = "scale_down")
+```
+
+## Three Factor Item Selection
+
+```{r three factor item selection no external}
+threeFactorBadItems <- read.csv("C:/Users/chika/Google Drive/Short-form_development/Comparison of search algorithms for short form selection/Results/three factor no external bad items.csv", stringsAsFactors = T)
+colnames(threeFactorBadItems) = c("Error Condition", "Item", "Factor Loading", "ACO", "SA", "TS", "GA")
+averagePropSelectedthree = as.data.frame(rbind(colMeans(threeFactorBadItems[1:6,4:7]), colMeans(threeFactorBadItems[7:12,4:7])))
+threeFactorBadItems[,4:7] = apply(threeFactorBadItems[,4:7], 2, as.character)
+
+averagePropSelectedthree$Item = averagePropSelectedthree$`Factor Loading` = ""
+averagePropSelectedthree$`Error Condition` = c("Minor Error Proportion:", "Major Error Proportion:")
+averagePropSelectedthree[,1:4] = round(averagePropSelectedthree[,1:4]/100, 3)
+
+threeFactorBadItems = rbind(threeFactorBadItems, averagePropSelectedthree)
+
+threeFactorBadItems %>% 
+  kable('latex', booktabs = T) %>%
+  # column_spec(column = 1:7, width = "0.7in") %>%
+  collapse_rows(columns = 1, valign = "middle", latex_hline = "major") %>%
+  kable_styling(latex_options = "scale_down")
+
+```
+
+## Corresponding Author
+
+\center{\huge{anthony.w.raborn@gmail.com}}
+
+# References
+
+## References {.allowframebreaks}
+
+
+\tiny
