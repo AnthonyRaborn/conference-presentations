@@ -19,6 +19,9 @@ suppressMessages(
   library(kableExtra, quietly = T)
   )
 options(dplyr.summarise.inform = F)
+suppressMessages(
+  library(lavaan, quietly = T)
+)
 ```
 
 # Background
@@ -26,14 +29,55 @@ options(dplyr.summarise.inform = F)
 How can we tell the number of latent factors that explain a set of items while
 developing a scale?
 
+. . .
+
 In applied settings, the general framework is to use an Exploratory Factor Analysis 
 (EFA) with part (e.g., half) of a data set of responses to items in order to generate
 hypothesis about the factor structure, then apply a Confirmatory Factor Analysis 
 (CFA) to test these hypothesis.
 
+. . .
+
 This can sometimes fail as standard EFA methods do not test for _simple structures_,
 where each item is related to one and only one latent factor, leading to the CFA 
 rejecting the hypothesis created based on the EFA.
+
+# Example EFA Output
+
+```{r example-efa, echo = F}
+exampleData <-
+  readRDS("data/Factors = 2, Median Loadings = 0,8, # Items Per Factor = 5, Total Items = 10, Factor Correlation = 0,3, Obs Per Item = 80.RDS")[[1]]
+
+set.seed(20211118)
+splitIndex <-
+  sample.int(n = nrow(exampleData),
+             size = nrow(exampleData)/2)
+trainData <-
+  exampleData[splitIndex,]
+testData <-
+  exampleData[-splitIndex,]
+
+print(
+  factanal(trainData, factors = 2)$loadings,
+  cutoff = 0.05
+)
+
+```
+# Example CFA Output
+
+```{r example-cfa, echo=F}
+model <-
+  'F1 =~ Item1 + Item2 + Item3 + Item4 + Item5
+   F2 =~ Item6 + Item7 + Item8 + Item9 + Item10
+   
+   F1 ~~ F2
+   '
+
+fitModel <-
+  cfa(model, testData, std.lv = T)
+
+parameterEstimates(fitModel, output = 'pretty', )
+```
 
 # Metaheuristic Algorithms 
 

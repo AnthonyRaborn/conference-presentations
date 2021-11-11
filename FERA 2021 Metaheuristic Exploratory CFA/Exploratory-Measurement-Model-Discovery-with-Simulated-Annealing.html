@@ -463,8 +463,73 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <section id="background" class="title-slide slide level1">
 <h1>Background</h1>
 <p>How can we tell the number of latent factors that explain a set of items while developing a scale?</p>
+<div class="fragment">
 <p>In applied settings, the general framework is to use an Exploratory Factor Analysis (EFA) with part (e.g., half) of a data set of responses to items in order to generate hypothesis about the factor structure, then apply a Confirmatory Factor Analysis (CFA) to test these hypothesis.</p>
+</div>
+<div class="fragment">
 <p>This can sometimes fail as standard EFA methods do not test for <em>simple structures</em>, where each item is related to one and only one latent factor, leading to the CFA rejecting the hypothesis created based on the EFA.</p>
+</div>
+</section>
+
+<section id="example-efa-output" class="title-slide slide level1">
+<h1>Example EFA Output</h1>
+<pre><code>## 
+## Loadings:
+##        Factor1 Factor2
+## Item1   0.630   0.111 
+## Item2   0.558         
+## Item3   0.611         
+## Item4   0.652         
+## Item5   0.595         
+## Item6           0.579 
+## Item7   0.157   0.597 
+## Item8           0.648 
+## Item9           0.581 
+## Item10 -0.051   0.505 
+## 
+##                Factor1 Factor2
+## SS loadings      1.892   1.721
+## Proportion Var   0.189   0.172
+## Cumulative Var   0.189   0.361</code></pre>
+</section>
+
+<section id="example-cfa-output" class="title-slide slide level1">
+<h1>Example CFA Output</h1>
+<pre><code>## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|) ci.lower ci.upper
+##   F1 =~                                                                 
+##     Item1             0.769    0.066   11.607    0.000    0.640    0.899
+##     Item2             0.697    0.069   10.080    0.000    0.561    0.832
+##     Item3             0.904    0.068   13.270    0.000    0.771    1.038
+##     Item4             0.765    0.068   11.243    0.000    0.632    0.899
+##     Item5             0.769    0.066   11.681    0.000    0.640    0.898
+##   F2 =~                                                                 
+##     Item6             0.810    0.066   12.287    0.000    0.681    0.940
+##     Item7             0.820    0.068   12.106    0.000    0.687    0.953
+##     Item8             0.977    0.071   13.819    0.000    0.839    1.116
+##     Item9             0.751    0.070   10.757    0.000    0.614    0.888
+##     Item10            0.730    0.062   11.841    0.000    0.609    0.851
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|) ci.lower ci.upper
+##   F1 ~~                                                                 
+##     F2                0.223    0.063    3.521    0.000    0.099    0.347
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|) ci.lower ci.upper
+##    .Item1             0.996    0.088   11.337    0.000    0.824    1.168
+##    .Item2             1.181    0.097   12.219    0.000    0.991    1.370
+##    .Item3             0.918    0.092    9.922    0.000    0.736    1.099
+##    .Item4             1.075    0.093   11.576    0.000    0.893    1.257
+##    .Item5             0.978    0.087   11.286    0.000    0.808    1.148
+##    .Item6             0.985    0.087   11.260    0.000    0.813    1.156
+##    .Item7             1.052    0.092   11.381    0.000    0.871    1.233
+##    .Item8             1.000    0.100   10.000    0.000    0.804    1.196
+##    .Item9             1.207    0.099   12.138    0.000    1.012    1.401
+##    .Item10            0.886    0.077   11.548    0.000    0.736    1.036
+##     F1                1.000                               1.000    1.000
+##     F2                1.000                               1.000    1.000</code></pre>
 </section>
 
 <section id="metaheuristic-algorithms" class="title-slide slide level1">
