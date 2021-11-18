@@ -18,6 +18,7 @@ suppressMessages(
 suppressMessages(
   library(kableExtra, quietly = T)
   )
+knitr::opts_chunk$set(echo=F)
 options(dplyr.summarise.inform = F)
 suppressMessages(
   library(lavaan, quietly = T)
@@ -59,7 +60,7 @@ testData <-
 
 print(
   factanal(trainData, factors = 2)$loadings,
-  cutoff = 0.05
+  cutoff = 0.0
 )
 
 ```
@@ -108,7 +109,7 @@ solutions at each iteration.
 # Hill Climbing with Simulated Annealing
 
 
-![Hill Climbing with Simulated Annealing](images/Hill_Climbing_with_Simulated_Annealing.gif)[^6]
+![Hill Climbing with Simulated Annealing](images/Hill_Climbing_with_Simulated_Annealing.gif){width=125%}[^6]
 
 # Objective
 
@@ -145,9 +146,10 @@ plot(x = currentStep, y = Temperature, type = "l",
 
 # Selection Function  
 
-$$ \begin{equation} P(Model_{New}|Fit_{New},Fit_{Old},T) = \\
-\begin{cases} \exp\biggl(\, \frac{Fit_{New} - Fit_{Old}}{T}\biggr), & Fit_{New} \leq Fit_{Old} \\ 1, & Fit_{New} > Fit_{Old} \end{cases} \end{equation} 
+$$ {\scriptstyle \begin{equation} P(Model_{New}|Fit_{New},Fit_{Old},T) = \\
+\begin{cases} \exp\biggl(\, \frac{Fit_{New} - Fit_{Old}}{T}\biggr), & Fit_{New} \leq Fit_{Old} \\ 1, & Fit_{New} > Fit_{Old} \end{cases} \end{equation} } 
 $$
+\normalsize
 ```{r selection-probability, echo=F, fig.width=4, fig.height=4}
 newFit <-
   .93
@@ -288,22 +290,104 @@ modelChosenTable <-
     desc(Factor.Correlation),
     desc(Obs.per.Item)
     )
+```
+<!-- modelChosenTable %>% -->
+<!--   kable( -->
+<!--     caption = "Times Each Latent Factor Model Chosen", -->
+<!--     col.names = c("Items Per Factor", "Avg. Factor Loading", -->
+<!--                   "Factor Corr.", "Obs. Per Item", -->
+<!--                   "Fit Stat.", "Factors Chosen = 2", -->
+<!--                   "Factors Chosen = 3", "Factors Chosen = 4") -->
+<!--     ) %>% -->
+<!--   kable_styling( -->
+<!--     bootstrap_options = c('striped', 'condensed'),  -->
+<!--     full_width = F, -->
+<!--     position = 'left', -->
+<!--     fixed_thead = T -->
+<!--     ) %>% -->
+<!--   scroll_box(height = '500px') -->
 
-modelChosenTable %>%
-  kable(
-    caption = "Times Each Latent Factor Model Chosen",
-    col.names = c("Items Per Factor", "Avg. Factor Loading",
-                  "Factor Corr.", "Obs. Per Item",
-                  "Fit Stat.", "Factors Chosen = 2",
-                  "Factors Chosen = 3", "Factors Chosen = 4")
-    ) %>%
-  kable_styling(
-    bootstrap_options = c('striped', 'condensed'), 
-    full_width = F,
-    position = 'left',
-    fixed_thead = T
-    ) %>%
-  scroll_box(height = '500px')
+```{r plot-data-latent-factors}
+itemsPerFactor5 <-
+  modelChosenTable %>%
+  pivot_longer(
+    cols = c(`Factors Chosen = 2`, `Factors Chosen = 3`, `Factors Chosen = 4`)
+  ) %>%
+  mutate(name = str_remove_all(name, 'Factors Chosen = ') %>% factor()) %>%
+  filter(Items.per.Factor == 5)
+itemsPerFactor15 <-
+  modelChosenTable %>%
+  pivot_longer(
+    cols = c(`Factors Chosen = 2`, `Factors Chosen = 3`, `Factors Chosen = 4`)
+  ) %>%
+  mutate(name = str_remove_all(name, 'Factors Chosen = ') %>% factor()) %>%
+  filter(Items.per.Factor == 15)
+itemsPerFactor30 <-
+  modelChosenTable %>%
+  pivot_longer(
+    cols = c(`Factors Chosen = 2`, `Factors Chosen = 3`, `Factors Chosen = 4`)
+  ) %>%
+  mutate(name = str_remove_all(name, 'Factors Chosen = ') %>% factor()) %>%
+  filter(Items.per.Factor == 30)
+```
+
+# 5 Items Per Factor
+```{r items-per-factor-5}
+itemsPerFactor5 %>%
+  ggplot(
+    aes(
+      x = name,
+      y = value,
+      fill = Fit.Statistic.Used
+      )
+    ) +
+    geom_bar(
+      stat = 'identity',
+      position = 'dodge'
+    ) +
+  facet_grid(rows = vars(Average.Factor.Loading),
+             cols = vars(Factor.Correlation, Obs.per.Item),
+             labeller = label_both)
+```
+
+# 15 Items Per Factor
+```{r items-per-factor-15}
+
+  itemsPerFactor15 %>%
+  ggplot(
+    aes(
+      x = name,
+      y = value,
+      fill = Fit.Statistic.Used
+      )
+    ) +
+    geom_bar(
+      stat = 'identity',
+      position = 'dodge'
+    ) +
+  facet_grid(rows = vars(Average.Factor.Loading),
+             cols = vars(Factor.Correlation, Obs.per.Item),
+             labeller = label_both)
+```
+
+# 30 Items Per Factor
+```{r items-per-factor-30}
+  itemsPerFactor30 %>%
+  ggplot(
+    aes(
+      x = name,
+      y = value,
+      fill = Fit.Statistic.Used,
+      )
+    ) +
+    geom_bar(
+      stat = 'identity',
+      position = 'dodge'
+    ) +
+  facet_grid(rows = vars(Average.Factor.Loading),
+             cols = vars(Factor.Correlation, Obs.per.Item),
+             labeller = label_both)
+
 ```
 
 #
@@ -365,36 +449,133 @@ resultsDFClipboard <-
          Obs.per.Item =
            as.numeric(Obs.per.Item)
          ) 
+```
+<!-- resultsDFClipboard %>% -->
+<!--   select(-Number.of.Factors) %>% -->
+<!--   select(Items.per.Factor, Average.Factor.Loading, Factor.Correlation, -->
+<!--          Obs.per.Item, Fit.Statistic.Used, CountFactorBothBest, -->
+<!--          Correct.Final.Model.Chosen) %>% -->
+<!--   arrange( -->
+<!--     Items.per.Factor, -->
+<!--     # desc(Number.of.Factors), -->
+<!--     desc(Average.Factor.Loading), -->
+<!--     desc(Factor.Correlation), -->
+<!--     desc(Obs.per.Item) -->
+<!--     ) %>% -->
+<!--     kable( -->
+<!--     caption = "Times Each Latent Factor Model Chosen", -->
+<!--     col.names = c("Items Per Factor", "Avg. Factor Loading", -->
+<!--                   "Factor Corr.", "Obs. Per Item", -->
+<!--                   "Fit Stat.", "Both Factors Correctly Specified", -->
+<!--                   "Correct Number of Factors") -->
+<!--     ) %>% -->
+<!--   kable_styling( -->
+<!--     bootstrap_options = c('striped', 'condensed'),  -->
+<!--     full_width = F, -->
+<!--     position = 'left', -->
+<!--     fixed_thead = T -->
+<!--     ) %>% -->
+<!--   scroll_box(height = '500px') -->
 
-resultsDFClipboard %>%
+```{r plot-data-model-specification}
+itemsPerFactor5 <-
+  resultsDFClipboard %>%
   select(-Number.of.Factors) %>%
   select(Items.per.Factor, Average.Factor.Loading, Factor.Correlation,
          Obs.per.Item, Fit.Statistic.Used, CountFactorBothBest,
          Correct.Final.Model.Chosen) %>%
   arrange(
     Items.per.Factor,
-    # desc(Number.of.Factors),
     desc(Average.Factor.Loading),
     desc(Factor.Correlation),
     desc(Obs.per.Item)
     ) %>%
-    kable(
-    caption = "Times Each Latent Factor Model Chosen",
-    col.names = c("Items Per Factor", "Avg. Factor Loading",
-                  "Factor Corr.", "Obs. Per Item",
-                  "Fit Stat.", "Both Factors Correctly Specified",
-                  "Correct Number of Factors")
+  filter(Items.per.Factor == 5)
+itemsPerFactor15 <-
+  resultsDFClipboard %>%
+  select(-Number.of.Factors) %>%
+  select(Items.per.Factor, Average.Factor.Loading, Factor.Correlation,
+         Obs.per.Item, Fit.Statistic.Used, CountFactorBothBest,
+         Correct.Final.Model.Chosen) %>%
+  arrange(
+    Items.per.Factor,
+    desc(Average.Factor.Loading),
+    desc(Factor.Correlation),
+    desc(Obs.per.Item)
     ) %>%
-  kable_styling(
-    bootstrap_options = c('striped', 'condensed'), 
-    full_width = F,
-    position = 'left',
-    fixed_thead = T
+  filter(Items.per.Factor == 15)
+itemsPerFactor30 <-
+  resultsDFClipboard %>%
+  select(-Number.of.Factors) %>%
+  select(Items.per.Factor, Average.Factor.Loading, Factor.Correlation,
+         Obs.per.Item, Fit.Statistic.Used, CountFactorBothBest,
+         Correct.Final.Model.Chosen) %>%
+  arrange(
+    Items.per.Factor,
+    desc(Average.Factor.Loading),
+    desc(Factor.Correlation),
+    desc(Obs.per.Item)
     ) %>%
-  scroll_box(height = '500px')
-
+  filter(Items.per.Factor == 30)
 ```
 
+# 5 Items Per Factor
+```{r items-per-factor-5-model-spec}
+itemsPerFactor5 %>%
+  ggplot(
+    aes(
+      x = Fit.Statistic.Used,
+      y = Correct.Final.Model.Chosen,
+      fill = Fit.Statistic.Used
+      )
+    ) +
+    geom_bar(
+      stat = 'identity',
+      position = 'dodge'
+    ) +
+  facet_grid(rows = vars(Average.Factor.Loading),
+             cols = vars(Factor.Correlation, Obs.per.Item),
+             labeller = label_both)
+```
+
+# 15 Items Per Factor
+```{r items-per-factor-15-model-spec}
+itemsPerFactor15 %>%
+  ggplot(
+    aes(
+      x = Fit.Statistic.Used,
+      y = Correct.Final.Model.Chosen,
+      fill = Fit.Statistic.Used
+      )
+    ) +
+    geom_bar(
+      stat = 'identity',
+      position = 'dodge'
+    ) +
+  facet_grid(rows = vars(Average.Factor.Loading),
+             cols = vars(Factor.Correlation, Obs.per.Item),
+             labeller = label_both)
+```
+
+# 30 Items Per Factor
+```{r items-per-factor-30-model-spec}
+  itemsPerFactor30 %>%
+  ggplot(
+    aes(
+      x = Fit.Statistic.Used,
+      y = Correct.Final.Model.Chosen,
+      fill = Fit.Statistic.Used
+      )
+    ) +
+    geom_bar(
+      stat = 'identity',
+      position = 'dodge'
+    ) +
+  facet_grid(rows = vars(Average.Factor.Loading),
+             cols = vars(Factor.Correlation, Obs.per.Item),
+             labeller = label_both)
+
+```
 ```{r model-specification-glm, echo=F, eval=F}
 resultsDFClipboard %>%
   filter(Number.of.Factors == 2) %>%
@@ -437,10 +618,10 @@ have better accuracy in other conditions.
 
 # Questions
 
-. . .
-
-  If you have any questions after the presentation, please email the first author 
+If you have any questions after the presentation, please email the first author 
 at anthony.w.raborn@gmail.com
+
+A copy of this presentation is available at https://github.com/AnthonyRaborn/conference-presentations
 
   <h1> Thank you! </h1>
 
